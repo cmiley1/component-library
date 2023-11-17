@@ -1,9 +1,9 @@
-import FunkyHero from "../components/funkyHero";
+import SimpleHero from "../components/simpleHero";
 
 export default function Home() {
   return (
     <main className="">
-      <FunkyHero />
+      <SimpleHero />
     </main>
   );
 }
