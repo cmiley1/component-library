@@ -1,33 +1,52 @@
 "use client";
 
 import React, { useState } from "react";
+import FinanceHero from "./FinanceHero";
+import FunHero from "./FunHero";
+import SimpleHero from "./simpleHero";
 
 export default function CanvaLikeComponent() {
   const [selectedElement, setSelectedElement] = useState(null);
   const [currentSidebarContent, setCurrentSidebarContent] = useState([]);
 
   const components = [
-    { id: 1, name: "Component 1", content: "Content for Component 1" },
-    { id: 2, name: "Component 2", content: "Content for Component 2" },
-    // ... more components
+    {
+      id: 1,
+      name: "Finance Hero",
+      component: <FinanceHero />,
+      sidebarClass: "scaled-down-style",
+    },
+    {
+      id: 2,
+      name: "Fun Hero",
+      component: <FunHero />,
+      sidebarClass: "scaled-down-style",
+    },
+    {
+      id: 3,
+      name: "Simple Hero",
+      component: <SimpleHero />,
+      sidebarClass: "scaled-down-style",
+    },
   ];
 
   const templates = [
-    { id: 1, name: "Template 1", content: "Content for Template 1" },
-    { id: 2, name: "Template 2", content: "Content for Template 2" },
-    // ... more templates
+    // ... template data
   ];
 
   const elements = [
-    { id: 1, name: "Element 1", content: "Content for Element 1" },
-    { id: 2, name: "Element 2", content: "Content for Element 2" },
-    // ... more elements
+    // ... element data
   ];
 
-  // Function to update main sidebar based on skinny sidebar selection
+  const sidebarElements = [
+    { id: 1, label: "Components", data: components },
+    { id: 2, label: "Templates", data: templates },
+    { id: 3, label: "Elements", data: elements },
+  ];
+
   const updateMainSidebar = (elementData) => {
     setCurrentSidebarContent(elementData);
-    setSelectedElement(null); // Reset the selected element
+    setSelectedElement(null);
   };
 
   return (
@@ -47,25 +66,16 @@ export default function CanvaLikeComponent() {
       {/* Lower section including both sidebars and main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Skinny Sidebar */}
-        <div className="w-20 p-20 bg-black text-white p-2 shadow-lg overflow-auto hover:bg-gray-10">
-          <button
-            onClick={() => updateMainSidebar(components)}
-            className="w-full flex flex-col items-center py-2 rounded hover:bg-white"
-          >
-            Components
-          </button>
-          <button
-            onClick={() => updateMainSidebar(templates)}
-            className="w-full flex flex-col items-center py-2 rounded hover:bg-gray-700 focus:bg-gray-700"
-          >
-            Templates
-          </button>
-          <button
-            onClick={() => updateMainSidebar(elements)}
-            className="w-full flex flex-col items-center py-2 rounded hover:bg-gray-700 focus:bg-gray-700"
-          >
-            Elements
-          </button>
+        <div className="w-20 bg-black p-2 shadow-lg overflow-auto">
+          {sidebarElements.map((element) => (
+            <button
+              key={element.id}
+              onClick={() => updateMainSidebar(element.data)}
+              className="w-full flex flex-col items-center py-2 rounded hover:bg-gray-700 focus:bg-gray-700"
+            >
+              <span className="text-white text-sm">{element.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Main Sidebar */}
@@ -73,10 +83,19 @@ export default function CanvaLikeComponent() {
           {currentSidebarContent.map((item) => (
             <button
               key={item.id}
-              onClick={() => setSelectedElement(item)}
-              className="flex items-center space-x-2 p-2 w-full text-left hover:bg-gray-200 rounded"
+              onClick={() => setSelectedElement(item.component)}
+              className="flex items-center justify-center p-2 w-full text-left hover:bg-gray-200 rounded"
             >
-              <span className="text-gray-600 text-sm">{item.name}</span>
+              {/* Wrapper to maintain aspect ratio */}
+              <div className="w-60 relative" style={{ paddingTop: "100%" }}>
+                {" "}
+                {/* 1:1 Aspect Ratio */}
+                <div
+                  className={`absolute top-0 left-0 w-full h-full flex items-center justify-center overflow-hidden ${item.sidebarClass}`}
+                >
+                  {item.component}
+                </div>
+              </div>
             </button>
           ))}
         </div>
@@ -90,14 +109,8 @@ export default function CanvaLikeComponent() {
           {/* Document Area */}
           <div className="flex-grow p-10 overflow-auto">
             <div className="bg-white w-full h-full max-w-4xl mx-auto shadow-lg rounded-lg p-6">
-              {/* Render the selected element's content */}
-              {selectedElement ? (
-                <div className="p-4 border border-gray-300 rounded">
-                  {selectedElement.content}
-                </div>
-              ) : (
-                "Select an item from the main sidebar"
-              )}
+              {/* Render the full component in the main content area */}
+              {selectedElement}
             </div>
           </div>
         </div>
