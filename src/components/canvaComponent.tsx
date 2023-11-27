@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import FinanceHero from "./FinanceHero";
 import FunHero from "./FunHero";
-import SimpleHero from "./simpleHero";
+import SimpleHero from "./SimpleHero";
 
 export default function CanvaLikeComponent() {
-  const [selectedElement, setSelectedElement] = useState(null);
+  const [selectedElements, setSelectedElements] = useState([]);
   const [currentSidebarContent, setCurrentSidebarContent] = useState([]);
 
   const components = [
@@ -28,25 +28,31 @@ export default function CanvaLikeComponent() {
       component: <SimpleHero />,
       sidebarClass: "scaled-down-style",
     },
+    // ... more components
   ];
 
-  const templates = [
-    // ... template data
-  ];
-
-  const elements = [
-    // ... element data
-  ];
+  // ... templates and elements definitions
 
   const sidebarElements = [
     { id: 1, label: "Components", data: components },
-    { id: 2, label: "Templates", data: templates },
-    { id: 3, label: "Elements", data: elements },
+    // ... other sidebar elements
   ];
 
   const updateMainSidebar = (elementData) => {
     setCurrentSidebarContent(elementData);
-    setSelectedElement(null);
+  };
+
+  const toggleComponentInMainContent = (component, id) => {
+    setSelectedElements((prevElements) => {
+      const isComponentSelected = prevElements.some(
+        (element) => element.id === id
+      );
+      if (isComponentSelected) {
+        return prevElements.filter((element) => element.id !== id);
+      } else {
+        return [...prevElements, { id, component }];
+      }
+    });
   };
 
   return (
@@ -83,13 +89,12 @@ export default function CanvaLikeComponent() {
           {currentSidebarContent.map((item) => (
             <button
               key={item.id}
-              onClick={() => setSelectedElement(item.component)}
+              onClick={() =>
+                toggleComponentInMainContent(item.component, item.id)
+              }
               className="flex items-center justify-center p-2 w-full text-left hover:bg-gray-200 rounded"
             >
-              {/* Wrapper to maintain aspect ratio */}
               <div className="w-60 relative" style={{ paddingTop: "100%" }}>
-                {" "}
-                {/* 1:1 Aspect Ratio */}
                 <div
                   className={`absolute top-0 left-0 w-full h-full flex items-center justify-center overflow-hidden ${item.sidebarClass}`}
                 >
@@ -101,17 +106,18 @@ export default function CanvaLikeComponent() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex flex-col flex-grow">
-          <div className="flex-shrink-0 bg-white p-4 shadow-md w-full">
-            {/* Secondary Navbar content can be placed here */}
-          </div>
-
-          {/* Document Area */}
-          <div className="flex-grow p-10 overflow-auto">
-            <div className="bg-white w-full h-full max-w-4xl mx-auto shadow-lg rounded-lg p-6">
-              {/* Render the full component in the main content area */}
-              {selectedElement}
-            </div>
+        <div className="flex-grow flex justify-center p-10">
+          <div
+            className="bg-white shadow-lg rounded-lg overflow-auto"
+            style={{ width: "1080px", height: "1280px" }}
+          >
+            {selectedElements.length > 0
+              ? selectedElements.map((item, index) => (
+                  <div key={index} className="mb-4">
+                    {item.component}
+                  </div>
+                ))
+              : "Select an item from the main sidebar"}
           </div>
         </div>
       </div>
