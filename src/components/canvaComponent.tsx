@@ -6,51 +6,62 @@ import FunHero from "./FunHero";
 import SimpleHero from "./SimpleHero";
 
 export default function CanvaLikeComponent() {
-  const [selectedElements, setSelectedElements] = useState([]);
   const [currentSidebarContent, setCurrentSidebarContent] = useState([]);
+  const [selectedElements, setSelectedElements] = useState([]);
+  const [componentOrder, setComponentOrder] = useState([
+    { id: 1, component: <FinanceHero /> },
+    { id: 2, component: <FunHero /> },
+    { id: 3, component: <SimpleHero /> },
+    // ... add more components as needed
+  ]);
+  const [draggedComponentId, setDraggedComponentId] = useState(null);
 
-  const components = [
-    {
-      id: 1,
-      name: "Finance Hero",
-      component: <FinanceHero />,
-      sidebarClass: "scaled-down-style",
-    },
-    {
-      id: 2,
-      name: "Fun Hero",
-      component: <FunHero />,
-      sidebarClass: "scaled-down-style",
-    },
-    {
-      id: 3,
-      name: "Simple Hero",
-      component: <SimpleHero />,
-      sidebarClass: "scaled-down-style",
-    },
-    // ... more components
-  ];
+  const onDragStart = (id) => {
+    setDraggedComponentId(id);
+  };
 
-  // ... templates and elements definitions
+  const onDrop = (id) => {
+    const newOrder = [...componentOrder];
+    const fromIndex = newOrder.findIndex(
+      (comp) => comp.id === draggedComponentId
+    );
+    const toIndex = newOrder.findIndex((comp) => comp.id === id);
+
+    if (fromIndex < 0 || toIndex < 0) return; // Check if indices are valid
+
+    // Swap elements
+    [newOrder[fromIndex], newOrder[toIndex]] = [
+      newOrder[toIndex],
+      newOrder[fromIndex],
+    ];
+    setComponentOrder(newOrder);
+  };
 
   const sidebarElements = [
-    { id: 1, label: "Components", data: components },
-    // ... other sidebar elements
+    {
+      id: 1,
+      label: "Components",
+      data: [
+        { id: 1, name: "Finance Hero", component: <FinanceHero /> },
+        { id: 2, name: "Fun Hero", component: <FunHero /> },
+        { id: 3, name: "Simple Hero", component: <SimpleHero /> },
+      ],
+    },
   ];
 
   const updateMainSidebar = (elementData) => {
     setCurrentSidebarContent(elementData);
   };
 
-  const toggleComponentInMainContent = (component, id) => {
-    setSelectedElements((prevElements) => {
-      const isComponentSelected = prevElements.some(
-        (element) => element.id === id
-      );
+  const toggleAndReorderComponents = (component, id) => {
+    setComponentOrder((prevOrder) => {
+      const isComponentSelected = prevOrder.some((el) => el.id === id);
       if (isComponentSelected) {
-        return prevElements.filter((element) => element.id !== id);
+        // Remove the component
+        return prevOrder.filter((el) => el.id !== id);
       } else {
-        return [...prevElements, { id, component }];
+        // Add the component
+        return [...prevOrder, { id, component }];
       }
     });
   };
@@ -90,7 +101,7 @@ export default function CanvaLikeComponent() {
             <button
               key={item.id}
               onClick={() =>
-                toggleComponentInMainContent(item.component, item.id)
+                toggleAndReorderComponents(item.component, item.id)
               }
               className="flex items-center justify-center p-2 w-full text-left hover:bg-gray-200 rounded"
             >
@@ -106,19 +117,30 @@ export default function CanvaLikeComponent() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-grow flex justify-center p-10">
-          <div
-            className="bg-white shadow-lg rounded-lg overflow-auto"
-            style={{ width: "1080px", height: "1280px" }}
-          >
-            {selectedElements.length > 0
-              ? selectedElements.map((item, index) => (
-                  <div key={index} className="mb-4">
-                    {item.component}
-                  </div>
-                ))
-              : "Select an item from the main sidebar"}
+        <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
+          {/* ... other components and sections ... */}
+
+          {/* Main Content Area */}
+          <div className="flex-grow flex justify-center p-10">
+            <div
+              className="canva-like-component bg-white shadow-lg rounded-lg overflow-auto"
+              style={{ width: "1080px", height: "1280px" }}
+            >
+              {componentOrder.map((item) => (
+                <div
+                  key={item.id}
+                  draggable
+                  onDragStart={() => onDragStart(item.id)}
+                  onDrop={() => onDrop(item.id)}
+                  onDragOver={(e) => e.preventDefault()}
+                >
+                  {item.component}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* ... rest of the component ... */}
         </div>
       </div>
     </div>
