@@ -7,35 +7,14 @@ import SimpleHero from "./SimpleHero";
 
 export default function CanvaLikeComponent() {
   const [currentSidebarContent, setCurrentSidebarContent] = useState([]);
-  const [selectedElements, setSelectedElements] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedComponentId, setDraggedComponentId] = useState(null);
+  // const [selectedElements, setSelectedElements] = useState([]);
   const [componentOrder, setComponentOrder] = useState([
     { id: 1, component: <FinanceHero /> },
     { id: 2, component: <FunHero /> },
     { id: 3, component: <SimpleHero /> },
-    // ... add more components as needed
   ]);
-  const [draggedComponentId, setDraggedComponentId] = useState(null);
-
-  const onDragStart = (id) => {
-    setDraggedComponentId(id);
-  };
-
-  const onDrop = (id) => {
-    const newOrder = [...componentOrder];
-    const fromIndex = newOrder.findIndex(
-      (comp) => comp.id === draggedComponentId
-    );
-    const toIndex = newOrder.findIndex((comp) => comp.id === id);
-
-    if (fromIndex < 0 || toIndex < 0) return; // Check if indices are valid
-
-    // Swap elements
-    [newOrder[fromIndex], newOrder[toIndex]] = [
-      newOrder[toIndex],
-      newOrder[fromIndex],
-    ];
-    setComponentOrder(newOrder);
-  };
 
   const sidebarElements = [
     {
@@ -48,6 +27,38 @@ export default function CanvaLikeComponent() {
       ],
     },
   ];
+
+  const onDragStart = (e, id) => {
+    setDraggedComponentId(id);
+    setIsDragging(true);
+    e.currentTarget.style.opacity = "0";
+
+    // Restore the element after a short delay
+    setTimeout(() => {
+      e.currentTarget.style.opacity = "";
+    }, 0);
+  };
+
+  const onDragEnd = (e) => {
+    e.currentTarget.style.opacity = "";
+    setIsDragging(false); // Reset dragging state when drag ends
+  };
+
+  const onDrop = (id) => {
+    const newOrder = [...componentOrder];
+    const fromIndex = newOrder.findIndex(
+      (comp) => comp.id === draggedComponentId
+    );
+    const toIndex = newOrder.findIndex((comp) => comp.id === id);
+
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    [newOrder[fromIndex], newOrder[toIndex]] = [
+      newOrder[toIndex],
+      newOrder[fromIndex],
+    ];
+    setComponentOrder(newOrder);
+  };
 
   const updateMainSidebar = (elementData) => {
     setCurrentSidebarContent(elementData);
@@ -118,9 +129,6 @@ export default function CanvaLikeComponent() {
 
         {/* Main Content Area */}
         <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
-          {/* ... other components and sections ... */}
-
-          {/* Main Content Area */}
           <div className="flex-grow flex justify-center p-10">
             <div
               className="canva-like-component bg-white shadow-lg rounded-lg overflow-auto"
@@ -130,17 +138,17 @@ export default function CanvaLikeComponent() {
                 <div
                   key={item.id}
                   draggable
-                  onDragStart={() => onDragStart(item.id)}
-                  onDrop={() => onDrop(item.id)}
+                  onDragStart={(e) => onDragStart(e, item.id)}
+                  onDragEnd={onDragEnd}
                   onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => onDrop(item.id)}
+                  className="cursor-grab"
                 >
                   {item.component}
                 </div>
               ))}
             </div>
           </div>
-
-          {/* ... rest of the component ... */}
         </div>
       </div>
     </div>
